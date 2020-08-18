@@ -1,5 +1,5 @@
+import 'package:fingerprint_door_lock_app/views/loading.dart';
 import 'package:flutter/material.dart';
-import 'views/welcome.dart';
 
 void main() => runApp(MyApp());
 
@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
       title: "fingerprint door lock",
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
-      home: LandingScreen(),
+      home: LoadingScreen(),
     );
   }
 }

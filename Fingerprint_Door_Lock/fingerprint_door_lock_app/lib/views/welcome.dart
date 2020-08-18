@@ -4,6 +4,7 @@ import 'dart:ui';
 import '../Animations/FadeAnimation.dart';
 
 class LandingScreen extends StatefulWidget {
+  static String id = "LandingScreen";
   @override
   _LandingScreenState createState() => _LandingScreenState();
 }
