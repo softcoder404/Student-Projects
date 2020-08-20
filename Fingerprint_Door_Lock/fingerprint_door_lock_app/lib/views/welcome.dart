@@ -1,5 +1,6 @@
+import 'package:fingerprint_door_lock_app/views/home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:ui';
 import '../Animations/FadeAnimation.dart';
 
@@ -11,7 +12,8 @@ class LandingScreen extends StatefulWidget {
 
 class _LandingScreenState extends State<LandingScreen> {
   GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-  bool _autoValidate = false;
+  GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  bool _autoValidate = true;
   bool _hidePass = true;
   double _sigmaX = 0.0; // from 0-10
   double _sigmaY = 0.0; // from 0-10
@@ -22,6 +24,7 @@ class _LandingScreenState extends State<LandingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       backgroundColor: Color.fromRGBO(71, 63, 151, 1),
       body: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
@@ -85,7 +88,9 @@ class _LandingScreenState extends State<LandingScreen> {
                                   child: TextFormField(
                                     style: TextStyle(
                                         color: Colors.black, fontSize: 20),
-                                    onSaved: (input) => name = input,
+                                    onChanged: (fullname) => name = fullname,
+                                    validator: (input) =>
+                                        input.isEmpty ? "*Required" : null,
                                     cursorColor: kPinkColor,
                                     decoration: InputDecoration(
                                         border: InputBorder.none,
@@ -98,7 +103,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                   child: TextFormField(
                                     style: TextStyle(
                                         color: Colors.black, fontSize: 20),
-                                    onSaved: (input) => uniqueId = input,
+                                    onChanged: (id) => uniqueId = id,
                                     validator: (input) =>
                                         input.isEmpty ? "*Required" : null,
                                     cursorColor: kPinkColor,
@@ -130,31 +135,23 @@ class _LandingScreenState extends State<LandingScreen> {
                       FadeAnimation(
                         1.8,
                         GestureDetector(
-                          onTap: () async {
-                            if (_formKey.currentState.validate()) {
-                              _formKey.currentState.save();
-                              //login user
-
-                            } else {}
-                            //show loading bar
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (BuildContext context) => Scaffold(
-                                backgroundColor: Colors.transparent,
-                                body: Center(
-                                  child: Container(
-                                    height: 80,
-                                    width: 80,
-                                    color: Colors.transparent,
-                                    child: SpinKitChasingDots(
-                                      color: kPinkColor,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                            //end loading bar
+                          onTap: () {
+                            if (_autoValidate) {
+                              if (uniqueId == "hackingthrough001") {
+                                print(uniqueId);
+                                print(name);
+                                Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            HomeScreen(name: name)));
+                              } else {
+                                SnackBar snackBar = new SnackBar(
+                                  content: Text('Enter A Unique ID'),
+                                  duration: Duration(seconds: 2),
+                                );
+                                scaffoldKey.currentState.showSnackBar(snackBar);
+                              }
+                            }
                           },
                           child: Center(
                             child: Container(
