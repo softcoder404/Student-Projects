@@ -1,7 +1,6 @@
 import 'dart:async';
-
 import 'package:fingerprint_door_lock_app/views/home.dart';
-import 'package:fingerprint_door_lock_app/views/welcome.dart';
+import 'package:fingerprint_door_lock_app/views/landing.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,34 +10,52 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
+  bool _isValid;
+  String _user;
+  Future getUser() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    _user = pref.getString('user');
+  }
+
   Future checkValidity() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    bool _isValid = pref.getBool('validity');
-    if (_isValid != null) {
-      if (_isValid) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => HomeScreen(
-                  name: "John Doe !",
-                )));
-      } else {
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => LandingScreen()));
-      }
+    _isValid = pref.getBool('validate');
+  }
+
+  void takeAction() {
+    if (_isValid == null) {
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LandingScreen()));
+    } else if (_isValid) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => HomeScreen(
+                name: _user,
+              )));
     } else {
-      Timer.periodic(Duration(seconds: 5), (Timer timer) {
-        _isValid = false;
-      });
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LandingScreen()));
     }
   }
 
+  Timer _timer;
   @override
   void initState() {
     checkValidity();
+    getUser();
     super.initState();
   }
 
   @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _timer = new Timer.periodic(Duration(seconds: 5), (Timer t) {
+      takeAction();
+    });
     return Scaffold(
         body: Container(
       height: MediaQuery.of(context).size.height,
