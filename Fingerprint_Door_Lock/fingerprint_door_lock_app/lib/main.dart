@@ -1,7 +1,12 @@
+import 'package:fingerprint_door_lock_app/services/service_locator.dart';
 import 'package:fingerprint_door_lock_app/views/loading.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  setupLocator();
+  setupPref();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
