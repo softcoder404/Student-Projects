@@ -2,7 +2,7 @@
 #define smokeSensor A5
 #define buzzer 6
 #define overrideButtonn 5
-#define triggerValue 56
+#define triggerValue 53
 bool smokeFlag = false;
 uint8_t counter = 0;
 LiquidCrystal lcd(8, 9, 10, 11, 12, 13);
@@ -16,18 +16,6 @@ void setup() {
   pinMode(smokeSensor, INPUT);
   pinMode(buzzer, OUTPUT);
   pinMode(overrideButtonn, INPUT_PULLUP);
-  //Set SMS format to ASCII
-  Serial.write("AT+CMGF=1\r\n");
-  delay(2000);
-  //Send new SMS command and message number
-  Serial.write("AT+CMGS=\"+2347014235169\"\r\n");
-  delay(1000);
-  //Send SMS content
-  Serial.write("There is a smart smoke detector, stay safe! stay out of fire!");
-  delay(1000);
-  //Send Ctrl+Z / ESC to denote SMS message is complete
-  Serial.write(26);
-  lcd.clear();
 }
 
 void loop() {
@@ -60,9 +48,8 @@ void loop() {
       lcd.print(" Sending Sms...");
       lcd.setCursor(0, 1);
       lcd.print("Please  Wait!!!");
+      sendSmsToBola();
       sendSms();
-      delay(1000);
-      sendSms2();
       lcd.clear();
       smokeFlag = false;
     }
@@ -73,7 +60,6 @@ void loop() {
 }
 
 void stayAtRest() {
-  //Serial.println("System At Safe Mode... Keep Calm!");
   lcd.setCursor(0, 0);
   lcd.print(" System At Safe");
   lcd.setCursor(0, 1);
@@ -87,33 +73,25 @@ void stayAtRest() {
 void sendSms() {
   Serial.begin(9600);
   delay(1000);
-  //Set SMS format to ASCII
   Serial.write("AT+CMGF=1\r\n");
   delay(1000);
-  //Send new SMS command and message number
   Serial.write("AT+CMGS=\"+2348037251470\"\r\n");
   delay(1000);
-  //SMS content
   Serial.write("A serious smoke detected. THERE COULD BE FIRE OUTBREAK.");
   delay(1000);
-  //Send Ctrl+Z / ESC to denote SMS message is complete
   Serial.write((char)26);
   delay(1000);
 }
 
-void sendSms2() {
+void sendSmsToBola() {
   Serial.begin(9600);
   delay(1000);
-  //Set SMS format to ASCII
   Serial.write("AT+CMGF=1\r\n");
   delay(1000);
-  //Send new SMS command and message number
-  Serial.write("AT+CMGS=\"+2349031919034\"\r\n");
+  Serial.write("AT+CMGS=\"+2347081315157\"\r\n");
   delay(1000);
-  //SMS content
   Serial.write("A serious smoke detected. THERE COULD BE FIRE OUTBREAK");
   delay(1000);
-  //Send Ctrl+Z / ESC to denote SMS message is complete
   Serial.write((char)26);
   delay(1000);
 }
