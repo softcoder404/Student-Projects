@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'package:fingerprint_lock/utils/custom_painter.dart';
 import 'package:fingerprint_lock/utils/service/bluetooth_service.dart';
 import 'package:fingerprint_lock/utils/service/fingerprint_service.dart';
-import 'package:fingerprint_lock/views/lock_logo_animator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +14,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   Future<void> saveData() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     await pref.setBool('validate', true);
@@ -23,12 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
   FingerprintHandler fingerprintHandler = FingerprintHandler();
   BluetoothHandlers bluetoothHandlers = BluetoothHandlers();
   Timer timer;
+   double lockRect = 0.0;
+  Animation<double> lockRectAnimation;
+
+  AnimationController controller;
 
   @override
   void initState() {
     fingerprintHandler.getBiometricsSupport().then((_) => setState(() {}));
-
-    super.initState();
     //Get current state
     FlutterBluetoothSerial.instance.state.then(
         (state) => setState(() => bluetoothHandlers.bluetoothState = state));
@@ -42,9 +44,13 @@ class _HomeScreenState extends State<HomeScreen> {
       bluetoothHandlers.bluetoothState = event;
       bluetoothHandlers.getPairedDevices().then((_) => setState(() {}));
     });
-  }
+    controller = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 2000));
+     
+     lockDoor();
+     super.initState();
 
-  bool _lockStatus = true;
+  }
   @override
   Widget build(BuildContext context) {
     saveData();
@@ -167,13 +173,13 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () => fingerprintHandler
                   .authenticateMe()
                   .then((val) => setState(() {
-                        val ? _lockStatus = true : _lockStatus = false;
+                        val ? lockDoor() : unlockDoor();
                         print("Finger found ? $val");
                       })),
               child: Container(
                 height: 300,
                 width: 220,
-                child: LockLogoAnimator(lockStatus: _lockStatus),
+                child: CustomPaint(painter: LockCustomPaint(lockRect),),
               ),
             ),
             Padding(
@@ -227,9 +233,29 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return items;
   }
+    void lockDoor() {
+    lockRectAnimation = Tween(begin: 1.0, end: 0.0).animate(controller)
+      ..addListener(() {
+        setState(() {
+          lockRect = lockRectAnimation.value;
+        });
+      });
+    controller.forward();
+  }
+
+  void unlockDoor() {
+    lockRectAnimation = Tween(begin: 1.0, end: 0.0).animate(controller)
+      ..addListener(() {
+        setState(() {
+          lockRect = lockRectAnimation.value;
+        });
+      });
+    controller.forward();
+  }
 
   @override
   void dispose() {
+    controller.dispose();
     if (bluetoothHandlers.isConnected) {
       bluetoothHandlers.isDisconnecting = true;
       bluetoothHandlers.connection.dispose();
