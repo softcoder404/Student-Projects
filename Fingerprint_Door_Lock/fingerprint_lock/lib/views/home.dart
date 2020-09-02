@@ -25,31 +25,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Timer timer;
    double lockRect = 0.0;
   Animation<double> lockRectAnimation;
-
   AnimationController controller;
-
+  bool isDoorLocked = false;
   @override
   void initState() {
-    fingerprintHandler.getBiometricsSupport().then((_) => setState(() {}));
+    fingerprintHandler.getBiometricsSupport();
     //Get current state
     FlutterBluetoothSerial.instance.state.then(
-        (state) => setState(() => bluetoothHandlers.bluetoothState = state));
+         (state) => setState(() => bluetoothHandlers.bluetoothState = state));
     bluetoothHandlers.deviceState = 0; // neutral
     // If the Bluetooth of the device is not enabled,
-    // then request permission to turn on Bluetooth
-    // as the app starts up
-    bluetoothHandlers.enableBluetooth().then((_) => setState(() {}));
-    // Listen for further state changes
+    bluetoothHandlers.enableBluetooth().then((_)=> setState((){}));
     FlutterBluetoothSerial.instance.onStateChanged().listen((event) {
       bluetoothHandlers.bluetoothState = event;
       bluetoothHandlers.getPairedDevices().then((_) => setState(() {}));
     });
     controller = AnimationController(
         vsync: this, duration: Duration(milliseconds: 2000));
-     
-     lockDoor();
+     if(!isDoorLocked) lockDoor();
      super.initState();
-
   }
   @override
   Widget build(BuildContext context) {
@@ -76,12 +70,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         .getPairedDevices()
                         .then((_) => setState(() {}));
                     bluetoothHandlers.isButtonUnavailable = false;
-
                     //disconnect from any connected device
-                    if (bluetoothHandlers.connected)
-                      bluetoothHandlers
-                          .disconnect()
-                          .then((_) => setState(() {}));
+                    if (bluetoothHandlers.connected) bluetoothHandlers.disconnect();
                   }),
             ],
           )
@@ -172,14 +162,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             GestureDetector(
               onTap: () => fingerprintHandler
                   .authenticateMe()
-                  .then((val) => setState(() {
-                        val ? lockDoor() : unlockDoor();
-                        print("Finger found ? $val");
-                      })),
+                  .then((fingerMatched){
+                        if(fingerMatched){
+                          if (controller.isCompleted) controller.reset();
+                          isDoorLocked ? unlockDoor() : lockDoor();
+                        }
+                      }),
               child: Container(
                 height: 300,
                 width: 220,
-                child: CustomPaint(painter: LockCustomPaint(lockRect),),
+                child: CustomPaint(painter: LockCustomPaint(lockRect)),
               ),
             ),
             Padding(
@@ -240,19 +232,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           lockRect = lockRectAnimation.value;
         });
       });
-    controller.forward();
+     controller.forward();
+     isDoorLocked = true;
   }
 
   void unlockDoor() {
-    lockRectAnimation = Tween(begin: 1.0, end: 0.0).animate(controller)
+    lockRectAnimation = Tween(begin: 0.0, end: 1.0).animate(controller)
       ..addListener(() {
         setState(() {
           lockRect = lockRectAnimation.value;
+          print(lockRect);
         });
       });
-    controller.forward();
+     controller.forward();
+     isDoorLocked = false;
   }
-
   @override
   void dispose() {
     controller.dispose();
