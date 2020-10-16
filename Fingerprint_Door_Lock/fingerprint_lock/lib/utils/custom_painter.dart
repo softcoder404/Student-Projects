@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 class LockCustomPaint extends CustomPainter {
   Paint _paint;
-  double lockRect;
-  LockCustomPaint(this.lockRect) {
+  double _lockRect;
+  LockCustomPaint(this._lockRect) {
     _paint = Paint()
       ..color = Colors.green
       ..strokeCap = StrokeCap.round
@@ -37,7 +37,7 @@ class LockCustomPaint extends CustomPainter {
     _paint.style = PaintingStyle.stroke;
     canvas.drawArc(semicircle, pi, pi, true, _paint);
     //lock rectangle
-    var lockrect = Rect.fromLTWH(size.width * .75, size.height * .4, 32, 30 * lockRect);
+    var lockrect = Rect.fromLTWH(size.width * .75, size.height * .4, 32, 30 * _lockRect);
     _paint.color = Colors.black;
     _paint.style = PaintingStyle.fill;
     canvas.drawRect(lockrect, _paint);

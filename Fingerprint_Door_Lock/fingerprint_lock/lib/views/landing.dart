@@ -2,7 +2,7 @@ import 'package:fingerprint_lock/views/home.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:ui';
-import '../Animation/fade_animation.dart';
+import '../animation/fade_animation.dart';
 
 class LandingScreen extends StatefulWidget {
   @override
