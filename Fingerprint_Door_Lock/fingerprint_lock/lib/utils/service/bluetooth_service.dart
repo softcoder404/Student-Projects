@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
-class BluetoothHandlers {
+class BluetoothHandlers{
   //Initializing the bluetooth connection state to be unknow
   BluetoothState bluetoothState = BluetoothState.UNKNOWN;
   // Track the bluetooth connection with the remote device
